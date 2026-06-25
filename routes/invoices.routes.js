@@ -16,8 +16,8 @@ router.get("/", verifyToken, async (req, res, next) => {
 router.get("/:invoiceId", verifyToken, async (req, res, next) => {
   try {
     const response = await Invoice.findOne({
-      ownerId: req.payload._id,
       _id: req.params.invoiceId,
+      ownerId: req.payload._id,
     });
     if (!response) {
       res.status(400).json({ message: "Invoice not found. " });

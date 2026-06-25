@@ -14,13 +14,10 @@ router.get("/", verifyToken, async (req, res, next) => {
 
 // GET /api/clients/:clientId
 router.get("/:clientId", verifyToken, async (req, res, next) => {
-  // res.send("GET client route, all good here");
-  // console.log(req.params.clientId);
-  // console.log(req.payload._id);
   try {
     const response = await Client.findOne({
-      ownerId: req.payload._id,
       _id: req.params.clientId,
+      ownerId: req.payload._id,
     });
     if (!response) {
       res.status(400).json({ message: "Client not found. " });
@@ -132,4 +129,22 @@ router.put("/:clientId", verifyToken, async (req, res, next) => {
     next(error);
   }
 });
+
+// DELETE /api/clients/:clientId
+router.delete("/:clientId", verifyToken, async (req, res, next) => {
+  try {
+    const response = await Client.findOneAndDelete({
+      _id: req.params.clientId,
+      ownerId: req.payload._id,
+    });
+    if (!response) {
+      res.status(400).json({ message: "Client not found." });
+      return;
+    }
+    res.status(200).json({ message: "client deleted." });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
