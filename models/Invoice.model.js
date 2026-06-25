@@ -2,6 +2,10 @@ const { Schema, model } = require("mongoose");
 
 const invoiceSchema = new Schema(
   {
+    ownerId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
     invoiceNumber: {
       type: Number,
       required: [true, "InvoiceNumber is required."],

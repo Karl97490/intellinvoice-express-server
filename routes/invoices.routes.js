@@ -4,7 +4,7 @@ const verifyToken = require("../middlewares/auth.middlewares");
 
 // POST /api/invoices/
 router.post("/", verifyToken, async (req, res, next) => {
-  console.log(req.body);
+  // console.log(req.body);
   const { invoiceNumber, status, issuedDate, dueDate, total } = req.body;
 
   if (!invoiceNumber) {
@@ -25,6 +25,7 @@ router.post("/", verifyToken, async (req, res, next) => {
     }
 
     const newInvoice = {
+      ownerId: req.payload._id,
       invoiceNumber,
       status,
       issuedDate,
