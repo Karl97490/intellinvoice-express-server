@@ -8,4 +8,8 @@ router.use("/auth", authRouter);
 const userRouter = require("./users.routes");
 router.use("/users", userRouter);
 
+// Invoices Routes
+const invoiceRouter = require("./invoices.routes");
+router.use("/invoices", invoiceRouter);
+
 module.exports = router;

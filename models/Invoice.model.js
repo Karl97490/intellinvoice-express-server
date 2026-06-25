@@ -4,8 +4,9 @@ const invoiceSchema = new Schema(
   {
     invoiceNumber: {
       type: Number,
-      required: true,
+      required: [true, "InvoiceNumber is required."],
       unique: true,
+      min: 1,
     },
     status: {
       type: String,
@@ -23,6 +24,7 @@ const invoiceSchema = new Schema(
     total: {
       type: Number,
       default: 0,
+      min: 0,
     },
   },
   {

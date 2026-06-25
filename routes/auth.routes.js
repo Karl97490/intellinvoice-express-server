@@ -50,7 +50,7 @@ router.post("/signup", async (req, res, next) => {
       email,
       password: hashPassword,
     };
-    const response = await User.create(newUser);
+    await User.create(newUser);
 
     res.status(201).json({ message: "user created." });
   } catch (error) {
