@@ -123,4 +123,22 @@ router.patch("/status/:invoiceId", verifyToken, async (req, res, next) => {
   }
 });
 
+// DELETE /api/invoices/:invoiceId
+router.delete("/:invoiceId", verifyToken, async (req, res, next) => {
+  try {
+    const response = await Invoice.findOneAndDelete({
+      _id: req.params.invoiceId,
+      ownerId: req.payload._id,
+    });
+    if (!response) {
+      res.status(400).json({ message: "Invoice not found." });
+      return;
+    }
+
+    res.status(200).json({ message: "invoice deleted." });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
