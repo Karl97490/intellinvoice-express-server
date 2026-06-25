@@ -67,4 +67,60 @@ router.post("/", verifyToken, async (req, res, next) => {
   }
 });
 
+// PATCH /api/invoices/:invoiceId
+router.patch("/:invoiceId", verifyToken, async (req, res, next) => {
+  const { issuedDate, dueDate, total } = req.body;
+
+  try {
+    const updatedInvoice = {
+      issuedDate,
+      dueDate,
+      total,
+    };
+    if (Object.values(updatedInvoice).includes(undefined)) {
+      res.status(400).json({ message: "Incorrect request." });
+      return;
+    }
+
+    const response = await Invoice.findOneAndUpdate(
+      { _id: req.params.invoiceId, ownerId: req.payload._id },
+      updatedInvoice,
+      { returnDocument: true, runValidators: true },
+    );
+    if (!response) {
+      res.status(400).json({ message: "Invoice not found." });
+      return;
+    }
+
+    res.status(200).json(response);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// PATCH /api/invoices/status/:invoiceId
+router.patch("/status/:invoiceId", verifyToken, async (req, res, next) => {
+  const { status } = req.body;
+  if (!status) {
+    res.status(400).json({ message: "Incorrect request." });
+    return;
+  }
+
+  try {
+    const response = await Invoice.findOneAndUpdate(
+      { _id: req.params.invoiceId, ownerId: req.payload._id },
+      { status },
+      { returnDocument: true, runValidators: true },
+    );
+    if (!response) {
+      res.status(400).json({ message: "Invoice not found." });
+      return;
+    }
+
+    res.status(200).json(response);
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
