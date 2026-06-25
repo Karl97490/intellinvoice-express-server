@@ -31,7 +31,6 @@ router.get("/:invoiceId", verifyToken, async (req, res, next) => {
 
 // POST /api/invoices/
 router.post("/", verifyToken, async (req, res, next) => {
-  // console.log(req.body);
   const { invoiceNumber, status, issuedDate, dueDate, total } = req.body;
 
   if (!invoiceNumber) {

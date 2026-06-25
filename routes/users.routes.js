@@ -90,7 +90,7 @@ router.patch("/email/:userId", verifyToken, async (req, res, next) => {
     res.status(400).json({ message: "Email incorrect. Please try again." });
     return;
   }
-  console.log(req.payload);
+
   if (email === req.payload.email) {
     res.status(400).json({ message: "Email already use." });
     return;

@@ -13,7 +13,6 @@ const clientSchema = new Schema(
     },
     email: {
       type: String,
-      unique: true,
       lowercase: true,
       trim: true,
     },
