@@ -2,6 +2,33 @@ const router = require("express").Router();
 const Invoice = require("../models/Invoice.model");
 const verifyToken = require("../middlewares/auth.middlewares");
 
+// GET /api/invoices/
+router.get("/", verifyToken, async (req, res, next) => {
+  try {
+    const response = await Invoice.find({ ownerId: req.payload._id });
+    res.status(200).json(response);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// GET /api/invoices/:invoiceId
+router.get("/:invoiceId", verifyToken, async (req, res, next) => {
+  try {
+    const response = await Invoice.findOne({
+      ownerId: req.payload._id,
+      _id: req.params.invoiceId,
+    });
+    if (!response) {
+      res.status(400).json({ message: "Invoice not found. " });
+      return;
+    }
+    res.status(200).json(response);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // POST /api/invoices/
 router.post("/", verifyToken, async (req, res, next) => {
   // console.log(req.body);
@@ -34,7 +61,7 @@ router.post("/", verifyToken, async (req, res, next) => {
     };
     await Invoice.create(newInvoice);
 
-    res.status(200).json({ message: "invoice created." });
+    res.status(201).json({ message: "invoice created." });
   } catch (error) {
     next(error);
   }
