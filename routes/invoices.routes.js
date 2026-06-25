@@ -34,7 +34,7 @@ router.post("/", verifyToken, async (req, res, next) => {
   const { invoiceNumber, status, issuedDate, dueDate, total } = req.body;
 
   if (!invoiceNumber) {
-    res.status(400).json({ message: "Invoice number are required." });
+    res.status(400).json({ message: "Invoice number is required." });
     return;
   }
 

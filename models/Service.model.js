@@ -12,7 +12,7 @@ const serviceSchema = new Schema({
   },
   type: {
     type: String,
-    enum: ["services", "produits", "prestations"],
+    enum: ["service", "produit", "prestation"],
   },
   description: {
     type: String,
