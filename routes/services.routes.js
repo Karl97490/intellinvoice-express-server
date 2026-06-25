@@ -2,11 +2,18 @@ const router = require("express").Router();
 const Service = require("../models/Service.model");
 const verifyToken = require("../middlewares/auth.middlewares");
 
+// GET /api/services/
+router.get("/", verifyToken, async (req, res, next) => {
+  try {
+    const response = await Service.find({ ownerId: req.payload._id });
+    res.status(201).json(response);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // POST /api/services/
 router.post("/", verifyToken, async (req, res, next) => {
-  // console.log(req.body);
-  // console.log(req.payload._id);
-  // res.send("POST services route, all good here");
   const { title, type, description, unitPrice } = req.body;
 
   if (!title) {
@@ -32,10 +39,6 @@ router.post("/", verifyToken, async (req, res, next) => {
 
 // PUT /api/services/:serviceId
 router.put("/:serviceId", verifyToken, async (req, res, next) => {
-  // console.log(req.body);
-  // console.log(req.payload._id);
-  // console.log(req.params.serviceId);
-  // res.send("PUT services route, all good here");
   const { title, type, description, unitPrice } = req.body;
 
   if (!title) {
@@ -66,6 +69,23 @@ router.put("/:serviceId", verifyToken, async (req, res, next) => {
     }
 
     res.status(200).json(response);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// DELETE /api/services/:serviceId
+router.delete("/:serviceId", verifyToken, async (req, res, next) => {
+  try {
+    const response = await Service.findOneAndDelete({
+      _id: req.params.serviceId,
+      ownerId: req.payload._id,
+    });
+    if (!response) {
+      res.status(400).json({ message: "Service not found." });
+      return;
+    }
+    res.status(200).json({ message: "service deleted." });
   } catch (error) {
     next(error);
   }
