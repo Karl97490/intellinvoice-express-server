@@ -1,5 +1,10 @@
 const router = require("express").Router();
 
+// Test Route
+router.get("/", async (req, res, next) => {
+  res.status(200).json({ message: "GET /api, all good here." });
+});
+
 // Authentification Routes
 const authRouter = require("./auth.routes");
 router.use("/auth", authRouter);

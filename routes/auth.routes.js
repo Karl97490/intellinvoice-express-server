@@ -16,6 +16,14 @@ router.post("/signup", async (req, res, next) => {
     return;
   }
 
+  const nameRegex = /^[\p{L}]+(?:[ '-][\p{L}]+)*$/u;
+  if (!nameRegex.test(firstName) || !nameRegex.test(lastName)) {
+    res
+      .status(400)
+      .json({ message: "First name and last name are incorrect." });
+    return;
+  }
+
   // Regex validations
   const emailRegex =
     /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/g;
@@ -112,8 +120,17 @@ router.post("/login", async (req, res, next) => {
 });
 
 // GET /api/auth/verify
-router.get("/verify", verifyToken, (req, res, next) => {
-  res.status(200).json(req.payload);
+router.get("/verify", verifyToken, async (req, res, next) => {
+  try {
+    const response = await User.findById(req.payload._id);
+    if (!response) {
+      res.status(400).json({ message: "User not found." });
+      return;
+    }
+    res.status(200).json(req.payload);
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = router;

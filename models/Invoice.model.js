@@ -9,8 +9,18 @@ const invoiceSchema = new Schema(
     invoiceNumber: {
       type: Number,
       required: [true, "InvoiceNumber is required."],
-      unique: true,
+      unique: [true, "invoiceNumber is unique."],
       min: 1,
+    },
+    owner: {
+      firstName: { type: String, required: true, trim: true },
+      lastName: { type: String, required: true, trim: true },
+      email: {
+        type: String,
+        required: true,
+        trim: true,
+        lowercase: true,
+      },
     },
     status: {
       type: String,

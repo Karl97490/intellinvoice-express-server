@@ -4,8 +4,21 @@ const verifyToken = require("../middlewares/auth.middlewares");
 
 // GET /api/invoices/
 router.get("/", verifyToken, async (req, res, next) => {
+  console.log(req.query);
+  const filter = { ownerId: req.payload._id };
+  const { search, status } = req.query;
+  if (search) {
+    filter.status = { $regex: search, $options: "i" };
+  }
+  console.log(filter);
   try {
-    const response = await Invoice.find({ ownerId: req.payload._id });
+    const response = await Invoice.find(filter);
+    if (!response.length) {
+      const response = await Invoice.find({ ownerId: req.payload._id });
+      res.status(200).json(response);
+      return;
+    }
+    console.log(response);
     res.status(200).json(response);
   } catch (error) {
     next(error);
@@ -14,6 +27,7 @@ router.get("/", verifyToken, async (req, res, next) => {
 
 // GET /api/invoices/:invoiceId
 router.get("/:invoiceId", verifyToken, async (req, res, next) => {
+  console.log(req.params.invoiceId);
   try {
     const response = await Invoice.findOne({
       _id: req.params.invoiceId,
