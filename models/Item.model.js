@@ -14,17 +14,17 @@ const itemSchema = new Schema({
     type: String,
     enum: ["service", "product"],
   },
-  unitPrice: {
-    type: Number,
-    default: 0,
-    min: 0,
-  },
   quantity: {
     type: Number,
     default: 0,
     min: 0,
   },
   taxRate: {
+    type: Number,
+    default: 0,
+    min: 0,
+  },
+  unitPrice: {
     type: Number,
     default: 0,
     min: 0,

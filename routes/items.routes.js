@@ -6,7 +6,7 @@ const verifyToken = require("../middlewares/auth.middlewares");
 router.get("/", verifyToken, async (req, res, next) => {
   try {
     const response = await Item.find({ ownerId: req.payload._id });
-    res.status(201).json(response);
+    res.status(200).json(response);
   } catch (error) {
     next(error);
   }
@@ -14,10 +14,10 @@ router.get("/", verifyToken, async (req, res, next) => {
 
 // POST /api/items/
 router.post("/", verifyToken, async (req, res, next) => {
-  const { title, type, description, unitPrice } = req.body;
+  const { title, type, quantity, taxRate, unitPrice } = req.body;
 
   if (!title) {
-    res.status(400).json({ message: "Title is required." });
+    res.status(400).json({ message: "Item title is required." });
     return;
   }
 
@@ -26,12 +26,13 @@ router.post("/", verifyToken, async (req, res, next) => {
       ownerId: req.payload._id,
       title,
       type,
-      description,
+      quantity,
+      taxRate,
       unitPrice,
     };
     await Item.create(newItem);
 
-    res.status(201).json({ message: "Item created." });
+    res.status(201).json({ message: "item created." });
   } catch (error) {
     next(error);
   }
@@ -39,10 +40,10 @@ router.post("/", verifyToken, async (req, res, next) => {
 
 // PUT /api/items/:itemId
 router.put("/:itemId", verifyToken, async (req, res, next) => {
-  const { title, type, description, unitPrice } = req.body;
+  const { title, type, quantity, taxRate, unitPrice } = req.body;
 
   if (!title) {
-    res.status(400).json({ message: "Title is required." });
+    res.status(400).json({ message: "Item title is required." });
     return;
   }
 
@@ -50,7 +51,8 @@ router.put("/:itemId", verifyToken, async (req, res, next) => {
     const updatedItem = {
       title,
       type,
-      description,
+      quantity,
+      taxRate,
       unitPrice,
     };
     if (Object.values(updatedItem).includes(undefined)) {
@@ -85,7 +87,7 @@ router.delete("/:itemId", verifyToken, async (req, res, next) => {
       res.status(400).json({ message: "Item not found." });
       return;
     }
-    res.status(200).json({ message: "Item deleted." });
+    res.status(200).json({ message: "item deleted" });
   } catch (error) {
     next(error);
   }

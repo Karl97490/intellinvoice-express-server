@@ -21,8 +21,8 @@ router.use("/invoices", invoiceRouter);
 const clientRouter = require("./clients.routes");
 router.use("/clients", clientRouter);
 
-// Services Routes
-const serviceRouter = require("./services.routes");
-router.use("/services", serviceRouter);
+// Items Routes
+const itemRouter = require("./items.routes");
+router.use("/items", itemRouter);
 
 module.exports = router;
