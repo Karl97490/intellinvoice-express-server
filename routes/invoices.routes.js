@@ -27,7 +27,6 @@ router.get("/", verifyToken, async (req, res, next) => {
 
 // GET /api/invoices/:invoiceId
 router.get("/:invoiceId", verifyToken, async (req, res, next) => {
-  console.log(req.params.invoiceId);
   try {
     const response = await Invoice.findOne({
       _id: req.params.invoiceId,
@@ -128,10 +127,18 @@ router.post("/", verifyToken, async (req, res, next) => {
 
 // PATCH /api/invoices/:invoiceId
 router.patch("/:invoiceId", verifyToken, async (req, res, next) => {
-  const { issuedDate, dueDate, total } = req.body;
+  const { items, issuedDate, dueDate, total } = req.body;
+
+  if (!Array.isArray(items) || items.length === 0) {
+    res
+      .status(400)
+      .json({ message: "Invoice must contain at least one item." });
+    return;
+  }
 
   try {
     const updatedInvoice = {
+      items,
       issuedDate,
       dueDate,
       total,
