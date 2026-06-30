@@ -1,6 +1,6 @@
 const { Schema, model } = require("mongoose");
 
-const serviceSchema = new Schema({
+const itemSchema = new Schema({
   ownerId: {
     type: Schema.Types.ObjectId,
     ref: "User",
@@ -12,18 +12,25 @@ const serviceSchema = new Schema({
   },
   type: {
     type: String,
-    enum: ["service", "produit", "prestation"],
-  },
-  description: {
-    type: String,
+    enum: ["service", "product"],
   },
   unitPrice: {
     type: Number,
     default: 0,
     min: 0,
   },
+  quantity: {
+    type: Number,
+    default: 0,
+    min: 0,
+  },
+  taxRate: {
+    type: Number,
+    default: 0,
+    min: 0,
+  },
 });
 
-const Service = model("Service", serviceSchema);
+const Item = model("Item", itemSchema);
 
-module.exports = Service;
+module.exports = Item;

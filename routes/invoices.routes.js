@@ -45,7 +45,8 @@ router.get("/:invoiceId", verifyToken, async (req, res, next) => {
 
 // POST /api/invoices/
 router.post("/", verifyToken, async (req, res, next) => {
-  const { invoiceNumber, status, issuedDate, dueDate, total } = req.body;
+  const { invoiceNumber, owner, client, status, issuedDate, dueDate, total } =
+    req.body;
 
   if (!invoiceNumber) {
     res.status(400).json({ message: "Invoice number is required." });
@@ -57,6 +58,30 @@ router.post("/", verifyToken, async (req, res, next) => {
     return;
   }
 
+  if (!owner || !client) {
+    res
+      .status(400)
+      .json({ message: "Owner and Client informations are required. " });
+    return;
+  }
+
+  if (!owner?.name || !owner?.address) {
+    res.status(400).json({ message: "Owner name and address are required." });
+    return;
+  }
+
+  if (!client?.name || !client?.address) {
+    res.status(400).json({ message: "Client name and address are required." });
+    return;
+  }
+
+  // const emailRegex =
+  //   /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/g;
+  // if (!emailRegex.test(owner.email)) {
+  //   res.status(400).json({ message: "Email incorrect. Please try again." });
+  //   return;
+  // }
+
   try {
     const foundInvoice = await Invoice.findOne({ invoiceNumber });
     if (foundInvoice) {
@@ -67,6 +92,18 @@ router.post("/", verifyToken, async (req, res, next) => {
     const newInvoice = {
       ownerId: req.payload._id,
       invoiceNumber,
+      owner: {
+        name: owner.name,
+        email: owner.email,
+        address: owner.address,
+        phone: owner.phone,
+      },
+      client: {
+        name: client.name,
+        email: client.email,
+        address: client.address,
+        phone: client.phone,
+      },
       status,
       issuedDate,
       dueDate,

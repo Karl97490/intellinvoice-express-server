@@ -1,18 +1,18 @@
 const router = require("express").Router();
-const Service = require("../models/Service.model");
+const Item = require("../models/Item.model");
 const verifyToken = require("../middlewares/auth.middlewares");
 
-// GET /api/services/
+// GET /api/items/
 router.get("/", verifyToken, async (req, res, next) => {
   try {
-    const response = await Service.find({ ownerId: req.payload._id });
+    const response = await Item.find({ ownerId: req.payload._id });
     res.status(201).json(response);
   } catch (error) {
     next(error);
   }
 });
 
-// POST /api/services/
+// POST /api/items/
 router.post("/", verifyToken, async (req, res, next) => {
   const { title, type, description, unitPrice } = req.body;
 
@@ -22,23 +22,23 @@ router.post("/", verifyToken, async (req, res, next) => {
   }
 
   try {
-    const newService = {
+    const newItem = {
       ownerId: req.payload._id,
       title,
       type,
       description,
       unitPrice,
     };
-    await Service.create(newService);
+    await Item.create(newItem);
 
-    res.status(201).json({ message: "service created." });
+    res.status(201).json({ message: "Item created." });
   } catch (error) {
     next(error);
   }
 });
 
-// PUT /api/services/:serviceId
-router.put("/:serviceId", verifyToken, async (req, res, next) => {
+// PUT /api/items/:itemId
+router.put("/:itemId", verifyToken, async (req, res, next) => {
   const { title, type, description, unitPrice } = req.body;
 
   if (!title) {
@@ -47,24 +47,24 @@ router.put("/:serviceId", verifyToken, async (req, res, next) => {
   }
 
   try {
-    const updatedService = {
+    const updatedItem = {
       title,
       type,
       description,
       unitPrice,
     };
-    if (Object.values(updatedService).includes(undefined)) {
+    if (Object.values(updatedItem).includes(undefined)) {
       res.status(400).json({ message: "Incorrect request." });
       return;
     }
 
-    const response = await Service.findOneAndUpdate(
-      { _id: req.params.serviceId, ownerId: req.payload._id },
-      updatedService,
+    const response = await Item.findOneAndUpdate(
+      { _id: req.params.itemId, ownerId: req.payload._id },
+      updatedItem,
       { returnDocument: true, runValidators: true },
     );
     if (!response) {
-      res.status(400).json({ message: "Service not found." });
+      res.status(400).json({ message: "Item not found." });
       return;
     }
 
@@ -74,18 +74,18 @@ router.put("/:serviceId", verifyToken, async (req, res, next) => {
   }
 });
 
-// DELETE /api/services/:serviceId
-router.delete("/:serviceId", verifyToken, async (req, res, next) => {
+// DELETE /api/items/:itemId
+router.delete("/:itemId", verifyToken, async (req, res, next) => {
   try {
-    const response = await Service.findOneAndDelete({
-      _id: req.params.serviceId,
+    const response = await Item.findOneAndDelete({
+      _id: req.params.itemId,
       ownerId: req.payload._id,
     });
     if (!response) {
-      res.status(400).json({ message: "Service not found." });
+      res.status(400).json({ message: "Item not found." });
       return;
     }
-    res.status(200).json({ message: "service deleted." });
+    res.status(200).json({ message: "Item deleted." });
   } catch (error) {
     next(error);
   }

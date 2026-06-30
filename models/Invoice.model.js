@@ -6,6 +6,10 @@ const invoiceSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
+    clientId: {
+      type: Schema.Types.ObjectId,
+      ref: "Client",
+    },
     invoiceNumber: {
       type: Number,
       required: [true, "InvoiceNumber is required."],
@@ -13,14 +17,26 @@ const invoiceSchema = new Schema(
       min: 1,
     },
     owner: {
-      firstName: { type: String, required: true, trim: true },
-      lastName: { type: String, required: true, trim: true },
+      // firstName: { type: String, required: true, trim: true },
+      // lastName: { type: String, required: true, trim: true },
+      name: { type: String, required: true, trim: true },
       email: {
         type: String,
-        required: true,
         trim: true,
         lowercase: true,
       },
+      address: { type: String, required: true, trim: true },
+      phone: { type: String, trim: true },
+    },
+    client: {
+      name: { type: String, required: true, trim: true },
+      email: {
+        type: String,
+        trim: true,
+        lowercase: true,
+      },
+      address: { type: String, required: true, trim: true },
+      phone: { type: String, trim: true },
     },
     status: {
       type: String,
