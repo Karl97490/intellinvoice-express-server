@@ -38,6 +38,35 @@ const invoiceSchema = new Schema(
       address: { type: String, required: true, trim: true },
       phone: { type: String, trim: true },
     },
+    items: [
+      {
+        itemId: { type: Schema.Types.ObjectId, ref: "Item" },
+        title: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        type: {
+          type: String,
+          enum: ["service", "product"],
+        },
+        quantity: {
+          type: Number,
+          default: 0,
+          min: 0,
+        },
+        taxRate: {
+          type: Number,
+          default: 0,
+          min: 0,
+        },
+        unitPrice: {
+          type: Number,
+          default: 0,
+          min: 0,
+        },
+      },
+    ],
     status: {
       type: String,
       enum: ["paid", "unpaid", "overdue", "pending"],

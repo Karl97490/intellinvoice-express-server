@@ -45,8 +45,16 @@ router.get("/:invoiceId", verifyToken, async (req, res, next) => {
 
 // POST /api/invoices/
 router.post("/", verifyToken, async (req, res, next) => {
-  const { invoiceNumber, owner, client, status, issuedDate, dueDate, total } =
-    req.body;
+  const {
+    invoiceNumber,
+    owner,
+    client,
+    items,
+    status,
+    issuedDate,
+    dueDate,
+    total,
+  } = req.body;
 
   if (!invoiceNumber) {
     res.status(400).json({ message: "Invoice number is required." });
@@ -75,12 +83,12 @@ router.post("/", verifyToken, async (req, res, next) => {
     return;
   }
 
-  // const emailRegex =
-  //   /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/g;
-  // if (!emailRegex.test(owner.email)) {
-  //   res.status(400).json({ message: "Email incorrect. Please try again." });
-  //   return;
-  // }
+  if (!Array.isArray(items) || items.length === 0) {
+    res
+      .status(400)
+      .json({ message: "Invoice must contain at least one item." });
+    return;
+  }
 
   try {
     const foundInvoice = await Invoice.findOne({ invoiceNumber });
@@ -104,6 +112,7 @@ router.post("/", verifyToken, async (req, res, next) => {
         address: client.address,
         phone: client.phone,
       },
+      items,
       status,
       issuedDate,
       dueDate,
