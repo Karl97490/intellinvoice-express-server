@@ -11,7 +11,7 @@ const invoiceSchema = new Schema(
       ref: "Client",
     },
     invoiceNumber: {
-      type: Number,
+      type: String,
       required: [true, "InvoiceNumber is required."],
       unique: [true, "invoiceNumber is unique."],
       min: 1,
@@ -70,7 +70,6 @@ const invoiceSchema = new Schema(
     status: {
       type: String,
       enum: ["paid", "unpaid", "overdue", "pending"],
-      default: "unpaid",
     },
     issuedDate: {
       type: Date,

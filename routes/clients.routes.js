@@ -6,7 +6,7 @@ const verifyToken = require("../middlewares/auth.middlewares");
 router.get("/", verifyToken, async (req, res, next) => {
   try {
     const response = await Client.find({ ownerId: req.payload._id });
-    res.status(201).json(response);
+    res.status(200).json(response);
   } catch (error) {
     next(error);
   }

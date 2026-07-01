@@ -60,8 +60,8 @@ router.post("/", verifyToken, async (req, res, next) => {
     return;
   }
 
-  if (invoiceNumber < 1 || typeof invoiceNumber !== "number") {
-    res.status(400).json({ message: "Invoice number are incorrect." });
+  if (invoiceNumber < 1 || typeof invoiceNumber !== "string") {
+    res.status(400).json({ message: "Invoice number is incorrect." });
     return;
   }
 
