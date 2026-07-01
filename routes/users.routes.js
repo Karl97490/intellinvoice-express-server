@@ -32,25 +32,21 @@ router.patch("/:userId", verifyToken, async (req, res, next) => {
     return;
   }
 
-  const { firstName, lastName } = req.body;
-
-  if (!firstName || !lastName) {
-    res.status(400).json({ message: "First name and last name are required." });
+  const { fullName } = req.body;
+  if (!fullName) {
+    res.status(400).json({ message: "Full name is required." });
     return;
   }
 
   const nameRegex = /^[\p{L}]+(?:[ '-][\p{L}]+)*$/u;
-  if (!nameRegex.test(firstName) || !nameRegex.test(lastName)) {
-    res
-      .status(400)
-      .json({ message: "First name and last name are incorrect." });
+  if (!nameRegex.test(fullName)) {
+    res.status(400).json({ message: "Full name is incorrect." });
     return;
   }
 
   try {
     const updatedUser = {
-      firstName,
-      lastName,
+      fullName,
     };
     const response = await User.findByIdAndUpdate(
       req.params.userId,
@@ -68,44 +64,52 @@ router.patch("/:userId", verifyToken, async (req, res, next) => {
   }
 });
 
-// PATCH /api/users/email/:userId
-router.patch("/email/:userId", verifyToken, async (req, res, next) => {
+// PATCH /api/users/company/:userId
+router.patch("/:userId", verifyToken, async (req, res, next) => {
   // Check if the id in the payload match with the id in the request params
   if (req.payload._id !== req.params.userId) {
     res.status(401).json({ message: "Unauthorized access." });
     return;
   }
 
-  const { email } = req.body;
-  // console.log(req.body);
-
-  if (!email) {
-    res.status(400).json({ message: "Email are required. " });
+  const { company } = req.body;
+  if (!company) {
+    res.status(400).json({ message: "Incorrect or missing informations." });
+    return;
+  }
+  if (!company.name) {
+    res.status(400).json({ message: "Company name is required." });
     return;
   }
 
   const emailRegex =
     /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/g;
-  if (!emailRegex.test(email)) {
-    res.status(400).json({ message: "Email incorrect. Please try again." });
+  if (!emailRegex.test(company.email)) {
+    res.status(400).json({ message: "Email is incorrect." });
     return;
   }
 
-  if (email === req.payload.email) {
-    res.status(400).json({ message: "Email already use." });
+  const validatePhone = company?.phone?.replace(/\D/g, "");
+  if (
+    validatePhone?.length < 7 ||
+    (validatePhone?.length > 15 && company?.phone)
+  ) {
+    res.status(400).json({ message: "Company phone number is incorrect. " });
     return;
   }
 
   try {
-    const foundUser = await User.findOne({ email });
-    if (foundUser) {
-      res.status(400).json({ message: "Email already exists." });
-      return;
-    }
-
+    const updatedUser = {
+      company: {
+        name: company.name,
+        email: company.email,
+        phone: company.phone,
+        address: company.address,
+      },
+    };
     const response = await User.findByIdAndUpdate(
       req.params.userId,
-      { email },
+      updatedUser,
       { returnDocument: true, runValidators: true },
     );
     if (!response) {
@@ -113,15 +117,7 @@ router.patch("/email/:userId", verifyToken, async (req, res, next) => {
       return;
     }
 
-    const payload = {
-      _id: req.payload._id,
-      email,
-    };
-
-    const authToken = jwt.sign(payload, process.env.TOKEN_SECRET, {
-      expiresIn: "7d",
-    });
-    res.status(200).json({ authToken });
+    res.status(200).json(response);
   } catch (error) {
     next(error);
   }
@@ -136,7 +132,6 @@ router.patch("/password/:userId", verifyToken, async (req, res, next) => {
   }
 
   const { password } = req.body;
-
   if (!password) {
     res.status(400).json({ message: "Password is required." });
     return;
@@ -187,5 +182,62 @@ router.delete("/:userId", verifyToken, async (req, res, next) => {
     next(error);
   }
 });
+
+// PATCH /api/users/email/:userId
+// router.patch("/email/:userId", verifyToken, async (req, res, next) => {
+//   // Check if the id in the payload match with the id in the request params
+//   if (req.payload._id !== req.params.userId) {
+//     res.status(401).json({ message: "Unauthorized access." });
+//     return;
+//   }
+
+//   const { email } = req.body;
+//   if (!email) {
+//     res.status(400).json({ message: "Email is required. " });
+//     return;
+//   }
+
+//   const emailRegex =
+//     /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/g;
+//   if (!emailRegex.test(email)) {
+//     res.status(400).json({ message: "Email incorrect. Please try again." });
+//     return;
+//   }
+
+//   if (email === req.payload.email) {
+//     res.status(400).json({ message: "Email already use." });
+//     return;
+//   }
+
+//   try {
+//     const foundUser = await User.findOne({ email });
+//     if (foundUser) {
+//       res.status(400).json({ message: "Email already exists." });
+//       return;
+//     }
+
+//     const response = await User.findByIdAndUpdate(
+//       req.params.userId,
+//       { email },
+//       { returnDocument: true, runValidators: true },
+//     );
+//     if (!response) {
+//       res.status(400).json({ message: "User not found." });
+//       return;
+//     }
+
+//     const payload = {
+//       _id: req.payload._id,
+//       email,
+//     };
+
+//     const authToken = jwt.sign(payload, process.env.TOKEN_SECRET, {
+//       expiresIn: "7d",
+//     });
+//     res.status(200).json({ authToken });
+//   } catch (error) {
+//     next(error);
+//   }
+// });
 
 module.exports = router;
