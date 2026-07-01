@@ -32,21 +32,22 @@ router.patch("/:userId", verifyToken, async (req, res, next) => {
     return;
   }
 
-  const { fullName } = req.body;
-  if (!fullName) {
-    res.status(400).json({ message: "Full name is required." });
+  const { firstName, lastName } = req.body;
+  if (!firstName || !lastName) {
+    res.status(400).json({ message: "First and last name are required." });
     return;
   }
 
   const nameRegex = /^[\p{L}]+(?:[ '-][\p{L}]+)*$/u;
-  if (!nameRegex.test(fullName)) {
-    res.status(400).json({ message: "Full name is incorrect." });
+  if (!nameRegex.test(firstName) || !nameRegex.test(lastName)) {
+    res.status(400).json({ message: "First or last name are incorrect." });
     return;
   }
 
   try {
     const updatedUser = {
-      fullName,
+      firstName,
+      lastName,
     };
     const response = await User.findByIdAndUpdate(
       req.params.userId,
