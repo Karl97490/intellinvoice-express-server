@@ -46,10 +46,6 @@ const invoiceSchema = new Schema(
           required: true,
           trim: true,
         },
-        type: {
-          type: String,
-          enum: ["service", "product"],
-        },
         quantity: {
           type: Number,
           default: 0,

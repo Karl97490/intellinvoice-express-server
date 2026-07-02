@@ -24,7 +24,7 @@ const userSchema = new Schema(
       required: [true, "Password is required."],
     },
     company: {
-      name: { type: String, trim: true, required: true },
+      name: { type: String, trim: true },
       email: {
         type: String,
         lowercase: true,
@@ -34,7 +34,6 @@ const userSchema = new Schema(
       address: {
         type: String,
         trim: true,
-        required: true,
       },
     },
   },

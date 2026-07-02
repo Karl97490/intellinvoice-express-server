@@ -32,7 +32,8 @@ router.patch("/:userId", verifyToken, async (req, res, next) => {
     return;
   }
 
-  const { firstName, lastName } = req.body;
+  const { firstName, lastName, company } = req.body;
+
   if (!firstName || !lastName) {
     res.status(400).json({ message: "First and last name are required." });
     return;
@@ -44,40 +45,11 @@ router.patch("/:userId", verifyToken, async (req, res, next) => {
     return;
   }
 
-  try {
-    const updatedUser = {
-      firstName,
-      lastName,
-    };
-    const response = await User.findByIdAndUpdate(
-      req.params.userId,
-      updatedUser,
-      { returnDocument: true, runValidators: true },
-    );
-    if (!response) {
-      res.status(400).json({ message: "User not found." });
-      return;
-    }
-
-    res.status(200).json(response);
-  } catch (error) {
-    next(error);
-  }
-});
-
-// PATCH /api/users/company/:userId
-router.patch("/:userId", verifyToken, async (req, res, next) => {
-  // Check if the id in the payload match with the id in the request params
-  if (req.payload._id !== req.params.userId) {
-    res.status(401).json({ message: "Unauthorized access." });
-    return;
-  }
-
-  const { company } = req.body;
   if (!company) {
-    res.status(400).json({ message: "Incorrect or missing informations." });
+    res.status(400).json({ message: "Company informations missing." });
     return;
   }
+
   if (!company.name) {
     res.status(400).json({ message: "Company name is required." });
     return;
@@ -101,6 +73,8 @@ router.patch("/:userId", verifyToken, async (req, res, next) => {
 
   try {
     const updatedUser = {
+      firstName,
+      lastName,
       company: {
         name: company.name,
         email: company.email,
