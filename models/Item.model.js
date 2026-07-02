@@ -15,7 +15,7 @@ const itemSchema = new Schema({
     default: 0,
     min: 0,
   },
-  taxRate: {
+  tax: {
     type: Number,
     default: 0,
     min: 0,

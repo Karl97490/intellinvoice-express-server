@@ -14,7 +14,7 @@ router.get("/", verifyToken, async (req, res, next) => {
 
 // POST /api/items/
 router.post("/", verifyToken, async (req, res, next) => {
-  const { title, type, quantity, taxRate, unitPrice } = req.body;
+  const { title, quantity, tax, unitPrice } = req.body;
 
   if (!title) {
     res.status(400).json({ message: "Item title is required." });
@@ -25,9 +25,8 @@ router.post("/", verifyToken, async (req, res, next) => {
     const newItem = {
       ownerId: req.payload._id,
       title,
-      type,
       quantity,
-      taxRate,
+      tax,
       unitPrice,
     };
     await Item.create(newItem);
@@ -40,7 +39,7 @@ router.post("/", verifyToken, async (req, res, next) => {
 
 // PUT /api/items/:itemId
 router.put("/:itemId", verifyToken, async (req, res, next) => {
-  const { title, type, quantity, taxRate, unitPrice } = req.body;
+  const { title, quantity, tax, unitPrice } = req.body;
 
   if (!title) {
     res.status(400).json({ message: "Item title is required." });
@@ -50,9 +49,8 @@ router.put("/:itemId", verifyToken, async (req, res, next) => {
   try {
     const updatedItem = {
       title,
-      type,
       quantity,
-      taxRate,
+      tax,
       unitPrice,
     };
     if (Object.values(updatedItem).includes(undefined)) {

@@ -5,19 +5,32 @@ const verifyToken = require("../middlewares/auth.middlewares");
 // GET /api/invoices/
 router.get("/", verifyToken, async (req, res, next) => {
   console.log(req.query);
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  const { search, issuedDate, dueDate } = req.query;
   const filter = { ownerId: req.payload._id };
-  const { search, status } = req.query;
   if (search) {
-    filter.status = { $regex: search, $options: "i" };
+    filter.$or = [
+      { "client.name": { $regex: search, $options: "i" } },
+      { invoiceNumber: { $regex: search } },
+    ];
+  }
+  if (issuedDate) {
+    filter.issuedDate = { $gte: new Date(issuedDate) };
+  }
+  if (dueDate) {
+    filter.dueDate = { $lte: new Date(dueDate) };
   }
   console.log(filter);
   try {
-    const response = await Invoice.find(filter);
-    if (!response.length) {
-      const response = await Invoice.find({ ownerId: req.payload._id });
-      res.status(200).json(response);
-      return;
-    }
+    const response = await Invoice.find(filter)
+      .skip((page - 1) * limit)
+      .limit(limit);
+    // if (!response.length) {
+    //   const response = await Invoice.find({ ownerId: req.payload._id });
+    //   res.status(200).json(response);
+    //   return;
+    // }
     console.log(response);
     res.status(200).json(response);
   } catch (error) {
@@ -127,7 +140,25 @@ router.post("/", verifyToken, async (req, res, next) => {
 
 // PATCH /api/invoices/:invoiceId
 router.patch("/:invoiceId", verifyToken, async (req, res, next) => {
-  const { items, issuedDate, dueDate, total } = req.body;
+  const { owner, client, items, issuedDate, dueDate, total } = req.body;
+
+  console.log(req.body);
+  if (!owner || !client) {
+    res
+      .status(400)
+      .json({ message: "Owner and Client informations are required. " });
+    return;
+  }
+
+  if (!owner?.name || !owner?.address) {
+    res.status(400).json({ message: "Owner name and address are required." });
+    return;
+  }
+
+  if (!client?.name || !client?.address) {
+    res.status(400).json({ message: "Client name and address are required." });
+    return;
+  }
 
   if (!Array.isArray(items) || items.length === 0) {
     res
@@ -138,6 +169,18 @@ router.patch("/:invoiceId", verifyToken, async (req, res, next) => {
 
   try {
     const updatedInvoice = {
+      owner: {
+        name: owner.name,
+        email: owner.email,
+        address: owner.address,
+        phone: owner.phone,
+      },
+      client: {
+        name: client.name,
+        email: client.email,
+        address: client.address,
+        phone: client.phone,
+      },
       items,
       issuedDate,
       dueDate,
