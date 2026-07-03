@@ -75,10 +75,28 @@ const invoiceSchema = new Schema(
       type: Date,
       default: new Date(),
     },
+    subTotal: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    tax: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    taxAmount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
     total: {
       type: Number,
       default: 0,
       min: 0,
+    },
+    notes: {
+      type: String,
     },
   },
   {

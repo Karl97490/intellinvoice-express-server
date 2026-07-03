@@ -1,15 +1,15 @@
 const router = require("express").Router();
 const Invoice = require("../models/Invoice.model");
 const verifyToken = require("../middlewares/auth.middlewares");
+const mongoose = require("mongoose");
 
 // GET /api/invoices/
 router.get("/", verifyToken, async (req, res, next) => {
   console.log(req.query);
 
-  const page = Number(req.query.page) || 1;
-  const limit = Number(req.query.limit) || 10;
-  console.log(limit);
-
+  const page = Number(req.query.page);
+  const limit = Number(req.query.limit);
+  console.log(page, limit);
   const { search, issuedDate, dueDate, status } = req.query;
   const activeStatuses = Object.keys(status || {}).filter(
     (key) => status[key] === "true",
@@ -76,25 +76,22 @@ router.get("/stats", verifyToken, async (req, res, next) => {
               $cond: [{ $eq: ["$status", "unpaid"] }, "$total", 0],
             },
           },
+          totalAmount: { $sum: "$total" },
         },
       },
     ]);
 
     const result =
-      stats.length > 0 ? stats[0] : { totalPaid: 0, totalUnpaid: 0 };
+      stats.length > 0
+        ? stats[0]
+        : { totalPaid: 0, totalUnpaid: 0, totalAmount: 0 };
 
-    // if (!response.length) {
-    //   const response = await Invoice.find({ ownerId: req.payload._id });
-    //   res.status(200).json(response);
-    //   return;
-    // }
     console.log(result, totalInvoices);
     res.status(200).json({
-      data: {
-        totalInvoices,
-        totalPaid: result.totalPaid,
-        totalUnpaid: result.totalUnpaid,
-      },
+      totalInvoices,
+      totalPaid: result.totalPaid,
+      totalUnpaid: result.totalUnpaid,
+      totalAmount: result.totalAmount,
     });
   } catch (error) {
     next(error);
@@ -128,7 +125,11 @@ router.post("/", verifyToken, async (req, res, next) => {
     status,
     issuedDate,
     dueDate,
+    subTotal,
+    tax,
+    taxAmount,
     total,
+    notes,
   } = req.body;
 
   if (!invoiceNumber) {
@@ -191,11 +192,17 @@ router.post("/", verifyToken, async (req, res, next) => {
       status,
       issuedDate,
       dueDate,
+      subTotal,
+      tax,
+      taxAmount,
       total,
+      notes,
     };
-    await Invoice.create(newInvoice);
+    const response = await Invoice.create(newInvoice);
 
-    res.status(201).json({ message: "invoice created." });
+    res
+      .status(201)
+      .json({ message: "invoice created.", invoiceId: response.id });
   } catch (error) {
     next(error);
   }
@@ -203,7 +210,18 @@ router.post("/", verifyToken, async (req, res, next) => {
 
 // PATCH /api/invoices/:invoiceId
 router.patch("/:invoiceId", verifyToken, async (req, res, next) => {
-  const { owner, client, items, issuedDate, dueDate, total } = req.body;
+  const {
+    owner,
+    client,
+    items,
+    issuedDate,
+    dueDate,
+    subTotal,
+    tax,
+    taxAmount,
+    total,
+    notes,
+  } = req.body;
 
   console.log(req.body);
   if (!owner || !client) {
@@ -247,7 +265,11 @@ router.patch("/:invoiceId", verifyToken, async (req, res, next) => {
       items,
       issuedDate,
       dueDate,
+      subTotal,
+      tax,
+      taxAmount,
       total,
+      notes,
     };
     if (Object.values(updatedInvoice).includes(undefined)) {
       res.status(400).json({ message: "Incorrect request." });
@@ -273,6 +295,7 @@ router.patch("/:invoiceId", verifyToken, async (req, res, next) => {
 // PATCH /api/invoices/status/:invoiceId
 router.patch("/status/:invoiceId", verifyToken, async (req, res, next) => {
   const { status } = req.body;
+  console.log(status);
   if (!status) {
     res.status(400).json({ message: "Incorrect request." });
     return;
@@ -289,7 +312,7 @@ router.patch("/status/:invoiceId", verifyToken, async (req, res, next) => {
       return;
     }
 
-    res.status(200).json(response);
+    res.status(200).json({ message: "status updated." });
   } catch (error) {
     next(error);
   }

@@ -25,6 +25,11 @@ const itemSchema = new Schema({
     default: 0,
     min: 0,
   },
+  total: {
+    type: Number,
+    default: 0,
+    min: 0,
+  },
 });
 
 const Item = model("Item", itemSchema);
