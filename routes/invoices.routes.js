@@ -5,22 +5,37 @@ const verifyToken = require("../middlewares/auth.middlewares");
 // GET /api/invoices/
 router.get("/", verifyToken, async (req, res, next) => {
   console.log(req.query);
+
   const page = Number(req.query.page) || 1;
   const limit = Number(req.query.limit) || 10;
-  const { search, issuedDate, dueDate } = req.query;
+  console.log(limit);
+
+  const { search, issuedDate, dueDate, status } = req.query;
+  const activeStatuses = Object.keys(status || {}).filter(
+    (key) => status[key] === "true",
+  );
+  // console.log(activeStatuses);
   const filter = { ownerId: req.payload._id };
+
   if (search) {
     filter.$or = [
       { "client.name": { $regex: search, $options: "i" } },
       { invoiceNumber: { $regex: search } },
     ];
   }
+
   if (issuedDate) {
     filter.issuedDate = { $gte: new Date(issuedDate) };
   }
+
   if (dueDate) {
     filter.dueDate = { $lte: new Date(dueDate) };
   }
+
+  if (activeStatuses.length > 0) {
+    filter.status = { $in: activeStatuses };
+  }
+
   console.log(filter);
   try {
     const response = await Invoice.find(filter)
@@ -33,6 +48,54 @@ router.get("/", verifyToken, async (req, res, next) => {
     // }
     console.log(response);
     res.status(200).json(response);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// GET /api/invoices/stats
+router.get("/stats", verifyToken, async (req, res, next) => {
+  try {
+    const totalInvoices = await Invoice.countDocuments({
+      ownerId: req.payload._id,
+    });
+    const stats = await Invoice.aggregate([
+      {
+        $match: { ownerId: new mongoose.Types.ObjectId(req.payload._id) },
+      },
+      {
+        $group: {
+          _id: null,
+          totalPaid: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "paid"] }, "$total", 0],
+            },
+          },
+          totalUnpaid: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "unpaid"] }, "$total", 0],
+            },
+          },
+        },
+      },
+    ]);
+
+    const result =
+      stats.length > 0 ? stats[0] : { totalPaid: 0, totalUnpaid: 0 };
+
+    // if (!response.length) {
+    //   const response = await Invoice.find({ ownerId: req.payload._id });
+    //   res.status(200).json(response);
+    //   return;
+    // }
+    console.log(result, totalInvoices);
+    res.status(200).json({
+      data: {
+        totalInvoices,
+        totalPaid: result.totalPaid,
+        totalUnpaid: result.totalUnpaid,
+      },
+    });
   } catch (error) {
     next(error);
   }

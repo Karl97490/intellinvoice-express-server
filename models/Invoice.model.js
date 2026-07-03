@@ -69,11 +69,11 @@ const invoiceSchema = new Schema(
     },
     issuedDate: {
       type: Date,
-      default: Date.now,
+      default: new Date(),
     },
     dueDate: {
       type: Date,
-      default: Date.now,
+      default: new Date(),
     },
     total: {
       type: Number,
